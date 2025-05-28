@@ -3,7 +3,7 @@ name: Deploy NaijaKYC App
 on:
   push:
     branches:
-      - main # Trigger when code is pushed to main
+      - main
 
 jobs:
   deploy:
@@ -13,43 +13,23 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up SSH key
+      - name: Debug Secrets (Optional)
         run: |
-          echo "${{ secrets.SSH_KEY }}" > key.pem
-          chmod 600 key.pem
-          eval "$(ssh-agent -s)"
-          ssh-add key.pem
+          echo "SERVER_HOST: ${{ secrets.SERVER_HOST }}"
+          echo "SERVER_USER: ${{ secrets.SERVER_USER }}"
+          echo "SSH_KEY is set: ${{ secrets.SSH_KEY != '' }}"
 
-      - name: Set up PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: "8.2"
-      - name: Check SSH connectivity to Bastion
+      - name: Test SSH Port Connectivity
         run: |
-              nc -zv ec2-13-217-250-195.compute-1.amazonaws.com 22
+          nc -zv ${{ secrets.SERVER_HOST }} 22
 
-      - name: SSH through Bastion and Deploy
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-            host: ${{ secrets.SERVER_HOST }} # Bastion IP
-            username: ${{ secrets.SERVER_USER }} # Bastion SSH user
-            key: ${{ secrets.SSH_KEY }} # Bastion SSH key
-            script: |
-              ssh -A -o StrictHostKeyChecking=no -i key.pem ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << EOF
-                cd /var/www/html/naijakyc
-                git pull origin main
-                php artisan migrate --force
-              EOF
-      - name: Deploy to AWS EC2 Instance via SSH
+      - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SSH_KEY }} # This is your Quiva-Key-Pair.pem content
+          key: ${{ secrets.SSH_KEY }}
           port: 22
-          echo SERVER_HOST: ${{ secrets.SERVER_HOST }}
-          echo SERVER_USER: ${{ secrets.SERVER_USER }}
-          echo SSH_KEY is set: ${{ secrets.SSH_KEY != '' }}
           script: |
             echo "🔒 Connecting to EC2 instance..."
             cd /var/www/html/naijakyc
@@ -61,3 +41,67 @@ jobs:
             chmod -R 755 .
             chown -R ec2-user:ec2-user .
             echo "✅ NaijaKYC deployed successfully!"
+
+# name: Deploy NaijaKYC App
+
+# on:
+#   push:
+#     branches:
+#       - main # Trigger when code is pushed to main
+
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v3
+
+#       - name: Set up SSH key
+#         run: |
+#           echo "${{ secrets.SSH_KEY }}" > key.pem
+#           chmod 600 key.pem
+#           eval "$(ssh-agent -s)"
+#           ssh-add key.pem
+
+#       - name: Set up PHP
+#         uses: shivammathur/setup-php@v2
+#         with:
+#           php-version: "8.2"
+#       - name: Check SSH connectivity to Bastion
+#         run: |
+#               nc -zv ec2-13-217-250-195.compute-1.amazonaws.com 22
+
+#       - name: SSH through Bastion
+#         uses: appleboy/ssh-action@v1.0.3
+#         with:
+#             host: ${{ secrets.SERVER_HOST }} # Bastion IP
+#             username: ${{ secrets.SERVER_USER }} # Bastion SSH user
+#             key: ${{ secrets.SSH_KEY }} # Bastion SSH key
+#             script: |
+#               ssh -A -o StrictHostKeyChecking=no -i key.pem ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << EOF
+#                 cd /var/www/html/naijakyc
+#                 git pull origin main
+#                 php artisan migrate --force
+#               EOF
+#       - name: Deploy to AWS EC2 Instance via SSH
+#         uses: appleboy/ssh-action@v1.0.3
+#         with:
+#           host: ${{ secrets.SERVER_HOST }}
+#           username: ${{ secrets.SERVER_USER }}
+#           key: ${{ secrets.SSH_KEY }} # This is your Quiva-Key-Pair.pem content
+#           port: 22
+#           echo SERVER_HOST: ${{ secrets.SERVER_HOST }}
+#           echo SERVER_USER: ${{ secrets.SERVER_USER }}
+#           echo SSH_KEY is set: ${{ secrets.SSH_KEY != '' }}
+#           script: |
+#             echo "🔒 Connecting to EC2 instance..."
+#             cd /var/www/html/naijakyc
+#             echo "🔄 Pulling latest code from Git..."
+#             git pull origin main
+#             echo "🧹 Clearing cache (if needed)..."
+#             rm -rf cache/* || true
+#             echo "🔒 Setting permissions..."
+#             chmod -R 755 .
+#             chown -R ec2-user:ec2-user .
+#             echo "✅ NaijaKYC deployed successfully!"
