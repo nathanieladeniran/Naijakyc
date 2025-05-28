@@ -33,6 +33,20 @@ jobs:
           script: |
             set -e  # ⛔ Stop execution on any error
             echo "🔒 Connecting to EC2 instance..."
+
+            # ✅ Check if git is installed
+            if ! command -v git &> /dev/null; then
+              echo "❌ Git is not installed. Installing..."
+              sudo yum install -y git || sudo apt-get install -y git
+            fi
+
+            # ✅ Ensure target directory exists
+            if [ ! -d /var/www/html/naijakyc ]; then
+              echo "📁 Directory does not exist. Creating..."
+              sudo mkdir -p /var/www/html/naijakyc
+              sudo chown -R $USER:$USER /var/www/html
+            fi
+            
             cd /var/www/html/naijakyc
             echo "🔄 Pulling latest code from Git..."
             git pull origin main
