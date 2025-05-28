@@ -34,7 +34,7 @@ jobs:
             set -e  # ⛔ Stop execution on any error
             echo "🔒 Connecting to EC2 instance..."
 
-            REPO_URL="git@github.com:${{ github.repository }}.git"
+            REPO_URL="https://github.com/${{ github.repository }}.git"
             PROJECT_DIR="/var/www/html/naijakyc"
 
             # Check for git, install if missing
