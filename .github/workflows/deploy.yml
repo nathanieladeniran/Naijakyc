@@ -1,0 +1,38 @@
+name: Deploy NaijaKYC App
+
+on:
+  push:
+    branches:
+      - main # Trigger when code is pushed to main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+
+      - name: Deploy to AWS EC2 Instance via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_KEY }} # This is your Quiva-Key-Pair.pem content
+          port: 22
+          script: |
+            echo "🔒 Connecting to EC2 instance..."
+            cd /var/www/naijakyc
+            echo "🔄 Pulling latest code from Git..."
+            git pull origin main
+            echo "🧹 Clearing cache (if needed)..."
+            rm -rf cache/* || true
+            echo "🔒 Setting permissions..."
+            chmod -R 755 .
+            chown -R ec2-user:ec2-user .
+            echo "✅ NaijaKYC deployed successfully!"
