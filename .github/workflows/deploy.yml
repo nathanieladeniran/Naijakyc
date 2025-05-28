@@ -30,7 +30,9 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_KEY }}
           port: 22
+          envs: GH_PAT
           script: |
+            export GH_PAT=${{ secrets.GH_PAT }}
             set -e  # ⛔ Stop execution on any error
             echo "🔒 Connecting to EC2 instance..."
 
