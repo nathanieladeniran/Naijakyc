@@ -31,6 +31,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: 22
           script: |
+            set -e  # ⛔ Stop execution on any error
             echo "🔒 Connecting to EC2 instance..."
             cd /var/www/html/naijakyc
             echo "🔄 Pulling latest code from Git..."
