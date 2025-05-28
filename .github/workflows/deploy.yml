@@ -32,8 +32,8 @@ jobs:
             username: ${{ secrets.SERVER_USER }} # Bastion SSH user
             key: ${{ secrets.SSH_KEY }} # Bastion SSH key
             script: |
-              ssh -o StrictHostKeyChecking=no -i ~/.ssh/internal.pem ${{ secrets.INTERNAL_SSH_USER }}@${{ secrets.PRIVATE_SERVER_IP }} << 'EOF'
-                cd /var/www/your-app
+              ssh -A -o StrictHostKeyChecking=no -i key.pem ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << EOF
+                cd /var/www/html/naijakyc
                 git pull origin main
                 php artisan migrate --force
               EOF
@@ -49,7 +49,7 @@ jobs:
           echo SSH_KEY is set: ${{ secrets.SSH_KEY != '' }}
           script: |
             echo "🔒 Connecting to EC2 instance..."
-            cd /var/www/naijakyc
+            cd /var/www/html/naijakyc
             echo "🔄 Pulling latest code from Git..."
             git pull origin main
             echo "🧹 Clearing cache (if needed)..."
