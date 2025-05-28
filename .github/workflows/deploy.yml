@@ -13,26 +13,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-<<<<<<< HEAD
-=======
       - name: Set up SSH key
         run: |
           echo "${{ secrets.SSH_KEY }}" > key.pem
           chmod 600 key.pem
           eval "$(ssh-agent -s)"
           ssh-add key.pem
-      
-      - name: SSH to Bastion and Then to Private Server
-        run: |
-          ssh -A -o StrictHostKeyChecking=no -i key.pem ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << EOF
-          ssh -o StrictHostKeyChecking=no ${{ secrets.INTERNAL_SERVER_USER }}@${{ secrets.PRIVATE_SERVER_IP }} << 'INNER'
-            cd /var/www/html/naijakyc
-            git pull origin main
-            php artisan migrate --force
-          INNER
-          EOF
-          
->>>>>>> db94236 (Update workflow)
+
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
