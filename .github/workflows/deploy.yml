@@ -20,23 +20,31 @@ jobs:
           eval "$(ssh-agent -s)"
           ssh-add key.pem
 
+          ssh -o StrictHostKeyChecking=no -A ec2-user@ec2-13-217-250-195.compute-1.amazonaws.com << 'EOSSH'
+          ssh -o StrictHostKeyChecking=no ec2-user@10.0.10.20 << 'INNER'
+            cd /var/www/html/naijakyc
+            git pull origin main
+            php artisan migrate --force
+          INNER
+        EOSSH
+
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: "8.2"
 
-      - name: SSH through Bastion and Deploy
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-            host: ${{ secrets.SERVER_HOST }} # Bastion IP
-            username: ${{ secrets.SERVER_USER }} # Bastion SSH user
-            key: ${{ secrets.SSH_KEY }} # Bastion SSH key
-            script: |
-              ssh -A -o StrictHostKeyChecking=no -i key.pem ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << EOF
-                cd /var/www/html/naijakyc
-                git pull origin main
-                php artisan migrate --force
-              EOF
+      # - name: SSH through Bastion and Deploy
+      #   uses: appleboy/ssh-action@v1.0.3
+      #   with:
+      #       host: ${{ secrets.SERVER_HOST }} # Bastion IP
+      #       username: ${{ secrets.SERVER_USER }} # Bastion SSH user
+      #       key: ${{ secrets.SSH_KEY }} # Bastion SSH key
+      #       script: |
+      #         ssh -A -o StrictHostKeyChecking=no -i key.pem ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << EOF
+      #           cd /var/www/html/naijakyc
+      #           git pull origin main
+      #           php artisan migrate --force
+      #         EOF
       - name: Deploy to AWS EC2 Instance via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
