@@ -34,27 +34,40 @@ jobs:
             set -e  # ⛔ Stop execution on any error
             echo "🔒 Connecting to EC2 instance..."
 
-            # ✅ Check if git is installed
+            REPO_URL="git@github.com:${{ github.repository }}.git"
+            PROJECT_DIR="/var/www/html/naijakyc"
+
+            # Check for git, install if missing
             if ! command -v git &> /dev/null; then
               echo "❌ Git is not installed. Installing..."
               sudo yum install -y git || sudo apt-get install -y git
             fi
 
-            # ✅ Ensure target directory exists
-            if [ ! -d /var/www/html/naijakyc ]; then
+            # Ensure the directory exists
+            if [ ! -d "$PROJECT_DIR" ]; then
               echo "📁 Directory does not exist. Creating..."
-              sudo mkdir -p /var/www/html/naijakyc
-              sudo chown -R $USER:$USER /var/www/html
+              mkdir -p "$PROJECT_DIR"
+              chown -R $USER:$USER "$PROJECT_DIR"
             fi
-            
-            cd /var/www/html/naijakyc
-            echo "🔄 Pulling latest code from Git..."
-            git pull origin main
+
+            cd "$PROJECT_DIR"
+
+            # Clone the repo if not already a git repo
+            if [ ! -d ".git" ]; then
+              echo "📦 Cloning repository..."
+              git clone "$REPO_URL" .
+            else
+              echo "🔄 Pulling latest code from Git..."
+              git pull origin main
+            fi
+
             echo "🧹 Clearing cache (if needed)..."
             rm -rf cache/* || true
+
             echo "🔒 Setting permissions..."
             chmod -R 755 .
-            chown -R ec2-user:ec2-user .
+            chown -R $USER:$USER .
+
             echo "✅ NaijaKYC deployed successfully!"
 
 # name: Deploy NaijaKYC App
