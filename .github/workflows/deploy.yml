@@ -25,6 +25,9 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_KEY }} # This is your Quiva-Key-Pair.pem content
           port: 22
+          echo SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          echo SERVER_USER: ${{ secrets.SERVER_USER }}
+          echo SSH_KEY is set: ${{ secrets.SSH_KEY != '' }}
           script: |
             echo "🔒 Connecting to EC2 instance..."
             cd /var/www/naijakyc
