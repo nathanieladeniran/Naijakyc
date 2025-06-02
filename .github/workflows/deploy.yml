@@ -48,8 +48,8 @@ jobs:
             # Ensure the directory exists
             if [ ! -d "$PROJECT_DIR" ]; then
               echo "📁 Directory does not exist. Creating..."
-              mkdir -p "$PROJECT_DIR"
-              chown -R $USER:$USER "$PROJECT_DIR"
+              sudo mkdir -p "$PROJECT_DIR"
+              sudo chown -R $USER:$USER "$PROJECT_DIR"
             fi
 
             cd "$PROJECT_DIR"
@@ -67,8 +67,8 @@ jobs:
             rm -rf cache/* || true
 
             echo "🔒 Setting permissions..."
-            chmod -R 755 .
-            chown -R $USER:$USER .
+            sudo chmod -R 755 .
+            sudo chown -R $USER:$USER .
 
             echo "✅ NaijaKYC deployed successfully!"
 
