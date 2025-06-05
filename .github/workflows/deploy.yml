@@ -36,7 +36,7 @@ jobs:
             set -e  # ⛔ Stop execution on any error
             echo "🔒 Connecting to EC2 instance..."
 
-            REPO_URL="https://${{ secrets.PERSONAL_TOKEN }}@github.com/${{ github.repository }}.git"
+            REPO_URL="https://${{ secrets.GH_PAT }}@github.com/${{ github.repository }}.git"
             PROJECT_DIR="/var/www/html/naijakyc"
 
             # Check for git, install if missing
@@ -64,7 +64,7 @@ jobs:
             fi
 
             echo "🧹 Clearing cache (if needed)..."
-            rm -rf cache/* || true
+            sudo rm -rf cache/* || true
 
             echo "🔒 Setting permissions..."
             sudo chmod -R 755 .
